@@ -6,7 +6,7 @@
 #include "grammar.h"
 #include "graminit.h"
 #include "node.h"
-#include "token.h"
+#include "token00.h"
 #include "parsetok.h"
 #include "errcode.h"
 #include <stdio.h>

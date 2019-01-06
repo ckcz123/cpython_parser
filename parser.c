@@ -388,7 +388,7 @@ Description
 
 The parser's interface is different than usual: the function addtoken()
 must be called for each token in the input.  This makes it possible to
-turn it into an incremental parsing system later.  The parsing systemwith gfile.GFile(currdir+'/frozen_graph', 'rb') as f:
+turn it into an incremental parsing system later.  The parsing system
 constructs a parse tree as it goes.
 
 A parsing rule is represented as a Deterministic Finite-state Automaton

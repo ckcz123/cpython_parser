@@ -13,7 +13,7 @@
 #include "pgenheaders.h"
 #include "grammar.h"
 #include "node.h"
-#include "token.h"
+#include "token00.h"
 #include "parser.h"
 
 /* Forward references */
