@@ -22,7 +22,8 @@ int main() {
     int iflags = 0;
     perrdetail err;
     node *n = PyParser_ParseStringFlagsFilenameEx(
-        "with a.b as c:\n    pass",
+        // "with a.b as c:\n    pass",
+        "with a, b:\n    pass",
         // "with gfile.GFile(currdir+'/frozen_graph', 'rb') as f:\n    a = 4+5\n    pass",
         "<string>", &_PyParser_Grammar, Py_file_input, &err, &iflags);
     printf("%s\n", n->n_str);
