@@ -6,7 +6,7 @@
 
 #include <ctype.h>
 
-#include "token00.h"
+#include "token.h"
 #include "grammar.h"
 
 #ifdef RISCOS

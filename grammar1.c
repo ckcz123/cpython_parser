@@ -4,7 +4,7 @@
 #include "Python.h"
 #include "pgenheaders.h"
 #include "grammar.h"
-#include "token00.h"
+#include "token.h"
 
 /* Return the DFA for the given type */
 

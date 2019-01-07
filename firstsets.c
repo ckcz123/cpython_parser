@@ -3,7 +3,7 @@
 
 #include "pgenheaders.h"
 #include "grammar.h"
-#include "token00.h"
+#include "token.h"
 
 extern int Py_DebugFlag;
 
