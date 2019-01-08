@@ -9,14 +9,19 @@
 #include "token.h"
 #include "parsetok.h"
 #include "errcode.h"
+#include "main.h"
 #include <stdio.h>
 
 extern grammar _PyParser_Grammar;
-
-int* predict(const char*, int*);
+extern char* token2chars[];
 
 int main() {
 
+    printf("%s\n", tokenize("with a.b as\n\tx:\n\ty\nz", 0));
+    printf("-----------\n\n");
+    printf("%s\n", predict("with a.b as "));
+
+    /*
     int size;
     int* valid = predict("with a.b as", &size);
     if (valid != NULL) {
@@ -27,6 +32,7 @@ int main() {
     }
     printf("Size = %d\n", size);
     PyObject_Free(valid);
+     */
 
     /*
     PyArena *arena = PyArena_New();
