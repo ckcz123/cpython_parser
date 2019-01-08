@@ -22,7 +22,7 @@ extern void __printtree(parser_state *ps);
 
 extern PyObject* _tokenize(const char*, int);
 
-extern PyObject* get_token_string(int);
+extern PyObject* _get_token_info(int);
 
 static parser_state* run_to_current(PyObject* list) {
     if (list == NULL)
@@ -111,7 +111,7 @@ char* predict(const char* code) {
 
     PyObject* ans = PyString_FromString("");
     for (int i = 0; i < size; ++i) {
-        PyString_ConcatAndDel(&ans, get_token_string(valid[i]));
+        PyString_ConcatAndDel(&ans, _get_token_info(valid[i]));
     }
 
     return PyString_AsString(ans);

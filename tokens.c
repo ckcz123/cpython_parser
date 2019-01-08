@@ -8,13 +8,9 @@
 #include "errcode.h"
 #include "main.h"
 
-typedef struct {
-    short type;
-    char* name;
-    char* str;
-} token;
-
 const char* END_MARKER = "__END_MARKER_FOR_PARSER__";
+
+extern grammar _PyParser_Grammar;
 
 char* token2chars[] = {
     "", // "ENDMARKER",
@@ -72,178 +68,6 @@ char* token2chars[] = {
     "<OP>", // "OP",
     "<ERROR>", // "<ERRORTOKEN>",
     "<N_TOKENS>", // "<N_TOKENS>"
-};
-
-token PyParser_Tokens[] = {
-    {0, "ENDMARKER", "EMPTY"},
-    {-1, NULL, NULL},
-    {4, "NEWLINE", "<NEWLINE>"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {0, "ENDMARKER", ""},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {50, "AT", "@"},
-    {-1, NULL, NULL},
-    {7, "LPAR", "("},
-    {-1, NULL, NULL},
-    {8, "RPAR", ")"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "def"},
-    {1, "NAME", "<NAME>"},
-    {-1, NULL, NULL},
-    {11, "COLON", ":"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {22, "EQUAL", "="},
-    {-1, NULL, NULL},
-    {12, "COMMA", ","},
-    {16, "STAR", "*"},
-    {36, "DOUBLESTAR", "**"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {13, "SEMI", ";"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {37, "PLUSEQUAL", "+="},
-    {38, "MINEQUAL", "-="},
-    {39, "STAREQUAL", "*="},
-    {40, "SLASHEQUAL", "/="},
-    {41, "PERCENTEQUAL", "%="},
-    {42, "AMPEREQUAL", "&="},
-    {43, "VBAREQUAL", "|="},
-    {44, "CIRCUMFLEXEQUAL", "^="},
-    {45, "LEFTSHIFTEQUAL", "<<="},
-    {46, "RIGHTSHIFTEQUAL", ">>="},
-    {47, "DOUBLESTAREQUAL", "**="},
-    {49, "DOUBLESLASHEQUAL", "//="},
-    {1, "NAME", "print"},
-    {35, "RIGHTSHIFT", ">>"},
-    {1, "NAME", "del"},
-    {-1, NULL, NULL},
-    {1, "NAME", "pass"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "break"},
-    {1, "NAME", "continue"},
-    {1, "NAME", "return"},
-    {1, "NAME", "raise"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "import"},
-    {-1, NULL, NULL},
-    {1, "NAME", "from"},
-    {23, "DOT", "."},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "as"},
-    {-1, NULL, NULL},
-    {1, "NAME", "global"},
-    {1, "NAME", "exec"},
-    {-1, NULL, NULL},
-    {1, "NAME", "in"},
-    {1, "NAME", "assert"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "if"},
-    {1, "NAME", "elif"},
-    {1, "NAME", "else"},
-    {1, "NAME", "while"},
-    {1, "NAME", "for"},
-    {1, "NAME", "try"},
-    {-1, NULL, NULL},
-    {1, "NAME", "finally"},
-    {1, "NAME", "with"},
-    {-1, NULL, NULL},
-    {1, "NAME", "except"},
-    {5, "INDENT", "<INDENT>"},
-    {6, "DEDENT", "<DEDENT>"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "lambda"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "or"},
-    {-1, NULL, NULL},
-    {1, "NAME", "and"},
-    {1, "NAME", "not"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {20, "LESS", "<"},
-    {21, "GREATER", ">"},
-    {28, "EQEQUAL", "=="},
-    {31, "GREATEREQUAL", ">="},
-    {30, "LESSEQUAL", "<="},
-    {29, "NOTEQUAL", "!="},
-    {29, "NOTEQUAL", "!="},
-    {1, "NAME", "is"},
-    {-1, NULL, NULL},
-    {18, "VBAR", "|"},
-    {-1, NULL, NULL},
-    {33, "CIRCUMFLEX", "^"},
-    {-1, NULL, NULL},
-    {19, "AMPER", "&"},
-    {-1, NULL, NULL},
-    {34, "LEFTSHIFT", "<<"},
-    {-1, NULL, NULL},
-    {14, "PLUS", "+"},
-    {15, "MINUS", "-"},
-    {-1, NULL, NULL},
-    {17, "SLASH", "/"},
-    {24, "PERCENT", "%"},
-    {48, "DOUBLESLASH", "//"},
-    {32, "TILDE", "~"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {9, "LSQB", "["},
-    {-1, NULL, NULL},
-    {10, "RSQB", "]"},
-    {26, "LBRACE", "{"},
-    {-1, NULL, NULL},
-    {27, "RBRACE", "}"},
-    {25, "BACKQUOTE", "`"},
-    {-1, NULL, NULL},
-    {2, "NUMBER", "<NUMBER>"},
-    {3, "STRING", "<STRING>"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "class"},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {-1, NULL, NULL},
-    {1, "NAME", "yield"}
 };
 
 static PyObject* add_token(struct tok_state *tok) {
@@ -351,7 +175,6 @@ PyObject* _tokenize(const char* code, int add_endmarker) {
 char* tokenize(const char* code, int add_endmarker) {
     PyObject* list = _tokenize(code, add_endmarker);
 
-    // Concatenate to one char
     PyObject* ans = PyString_FromString("");
     ssize_t size = PyList_Size(list);
     for (ssize_t i = 0; i < size; ++i) {
@@ -367,7 +190,10 @@ char* tokenize(const char* code, int add_endmarker) {
     return PyString_AsString(ans);
 }
 
-PyObject* get_token_string(int index) {
-    token* tok = &PyParser_Tokens[index];
-    return PyString_FromFormat("%d\t%s\t%s\n", tok->type, tok->name, tok->str);
+PyObject* _get_token_info(int index) {
+    label* l = _PyParser_Grammar.g_ll.ll_label+index;
+    int type = l->lb_type;
+    char* str = l->lb_str;
+    if (type >= NT_OFFSET) return PyString_FromString("");
+    return PyString_FromFormat("%d\t%s\t%s\n", type, _PyParser_TokenNames[type], str?str:token2chars[type]);
 }

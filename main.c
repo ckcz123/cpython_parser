@@ -12,8 +12,8 @@
 #include "main.h"
 #include <stdio.h>
 
-extern grammar _PyParser_Grammar;
-extern char* token2chars[];
+// extern grammar _PyParser_Grammar;
+// extern char* token2chars[];
 
 int main() {
 
