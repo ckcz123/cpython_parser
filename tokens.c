@@ -17,9 +17,9 @@ char* token2chars[] = {
     "<NAME>", // "NAME",
     "<NUMBER>", // "NUMBER",
     "<STRING>", // "STRING",
-    "<NEWLINE>", // "NEWLINE",
-    "<INDENT>", // "INDENT",
-    "<DEDENT>", // "DEDENT",
+    "<ENTER>", // "NEWLINE", // --- Use <ENTER>
+    "<IND>", // "INDENT", // --- Use <IND>
+    "<UNIND>", // "DEDENT", // --- Use <UNIND>
     "(", // "LPAR",
     ")", // "RPAR",
     "[", // "LSQB",
@@ -181,8 +181,13 @@ char* tokenize(const char* code, int add_endmarker) {
         PyObject* tuple = PyList_GetItem(list, i);
         long type = PyLong_AsLong(PyTuple_GetItem(tuple, 0));
         char* str = PyString_AsString(PyTuple_GetItem(tuple, 1));
+        char* output;
+        if (*str == '\0') output = token2chars[type];
+        else if (type == 2) output = "<float>";
+        else if (type == 3) output = "<str>";
+        else output = str;
         PyObject* newstr = PyString_FromFormat("%ld\t%s\t%s\n",
-            type, _PyParser_TokenNames[type], *str=='\0'?token2chars[type]:str);
+            type, _PyParser_TokenNames[type], output);
         PyString_ConcatAndDel(&ans, newstr);
     }
     Py_DecRef(list);

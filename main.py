@@ -19,6 +19,6 @@ def test(code):
     print "-- -- -- -- -- -- -- --"
 
 test("with a.b, c as d:")
-test("for a, b in c.d:")
+test("for a, b in c['x'][2]:")
 test("[a for b in range(c")
 
