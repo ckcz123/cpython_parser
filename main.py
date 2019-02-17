@@ -10,15 +10,15 @@ predict = dll.predict
 predict.argtypes = [c_char_p]
 predict.restype = c_char_p
 
-v = "with a.b as\n\tx:\n\ty\nz"
-print tokenize(v, 0)
+def test(code):
+    print tokenize(code, 0)
+    print "--------------"
+    print predict(code)
+    print "--------------"
+    print tokenize(code, 1)
+    print "-- -- -- -- -- -- -- --"
 
-print "------"
+test("with a.b, c as d:")
+test("for a, b in c.d:")
+test("[a for b in range(c")
 
-print predict(v)
-
-print "------"
-
-print tokenize(v, 1)
-
-# print predict(v)
