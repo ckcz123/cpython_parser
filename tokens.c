@@ -138,7 +138,7 @@ static PyObject* add_token(struct tok_state *tok) {
         PyList_Append(obj, tuple);
     }
 
-    PyObject_Free(tok);
+    PyTokenizer_Free(tok);
     return obj;
 }
 

@@ -16,10 +16,10 @@
 // extern char* token2chars[];
 
 int main() {
-
-    printf("%s\n", tokenize("with a.b as\n\tx:\n\ty\nz", 0));
+    printf("%s\n", predict("with a.b as x:\n\ty\nz"));
     printf("-----------\n\n");
-    printf("%s\n", predict("with a.b as "));
+    printf("%s\n", tokenize("with a.b as x:\n\ty\nz", 0));
+    // printf("%s\n", tokenize("with a.b as", 0));
 
     /*
     int size;

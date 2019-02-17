@@ -38,7 +38,9 @@ static parser_state* run_to_current(PyObject* list) {
     for (ssize_t i = 0; i < len; ++i) {
         PyObject* tuple = PyList_GetItem(list, i);
         int type = (int)PyLong_AsLong(PyTuple_GetItem(tuple, 0));
-        char* str = PyString_AsString(PyTuple_GetItem(tuple, 1));
+        char* _str = PyString_AsString(PyTuple_GetItem(tuple, 1));
+        char* str = (char*)PyObject_Malloc(strlen(_str)+3);
+        strcpy(str, _str);
         int lineno = (int)PyLong_AsLong(PyTuple_GetItem(tuple, 2));
         int col_offset = (int)PyLong_AsLong(PyTuple_GetItem(tuple, 3));
 
@@ -56,6 +58,7 @@ static parser_state* run_to_current(PyObject* list) {
 
     // Get PS
     D(__printtree(ps));
+    Py_DecRef(list);
     return ps;
 }
 
@@ -114,5 +117,6 @@ char* predict(const char* code) {
         PyString_ConcatAndDel(&ans, _get_token_info(valid[i]));
     }
 
+    free(valid);
     return PyString_AsString(ans);
 }
