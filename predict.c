@@ -11,41 +11,34 @@
 #include "graminit.h"
 #include "errcode.h"
 #include "main.h"
+#include "vec.h"
 #include <string.h>
 #include <stdio.h>
 
-#define D(x) x
+#define D(x)
 
 extern grammar _PyParser_Grammar;
 
 extern void __printtree(parser_state *ps);
 
-extern PyObject* _tokenize(const char*, int);
+extern int split_type_and_str(char* s, char** output);
 
-extern PyObject* _get_token_info(int);
+extern vec_str_t* _tokenize(const char*, int);
 
-static parser_state* run_to_current(PyObject* list) {
-    if (list == NULL)
-        return NULL;
+extern char* _get_token_info(int);
 
-    ssize_t len = PyList_Size(list);
-
+static parser_state* run_to_current(vec_str_t* vec_str) {
+    int len = vec_str->length;
     parser_state* ps;
     if ((ps = PyParser_New(&_PyParser_Grammar, Py_file_input)) == NULL) {
         fprintf(stderr, "no mem for new parser\n");
         return NULL;
     }
-    for (ssize_t i = 0; i < len; ++i) {
-        PyObject* tuple = PyList_GetItem(list, i);
-        int type = (int)PyLong_AsLong(PyTuple_GetItem(tuple, 0));
-        char* _str = PyString_AsString(PyTuple_GetItem(tuple, 1));
-        char* str = (char*)PyObject_Malloc(strlen(_str)+3);
-        strcpy(str, _str);
-        int lineno = (int)PyLong_AsLong(PyTuple_GetItem(tuple, 2));
-        int col_offset = (int)PyLong_AsLong(PyTuple_GetItem(tuple, 3));
-
+    for (int i = 0; i < len; ++i) {
+        char* s = vec_str->data[i], *str;
+        int type = split_type_and_str(s, &str);
         int error;
-        if ((error = PyParser_AddToken(ps, type, str, lineno, col_offset,
+        if ((error = PyParser_AddToken(ps, type, str, 1, 0,
                                        NULL)) != E_OK) {
             if (error != E_DONE) {
                 fprintf(stderr, "ERROR in parsing...\n");
@@ -58,7 +51,8 @@ static parser_state* run_to_current(PyObject* list) {
 
     // Get PS
     D(__printtree(ps));
-    Py_DecRef(list);
+    vec_deinit(vec_str);
+    free(vec_str);
     return ps;
 }
 
@@ -112,11 +106,29 @@ char* predict(const char* code) {
     if (valid == NULL)
         return NULL;
 
-    PyObject* ans = PyString_FromString("");
+    // Concatenate
+    size_t total = 0;
     for (int i = 0; i < size; ++i) {
-        PyString_ConcatAndDel(&ans, _get_token_info(valid[i]));
+        char* str = _get_token_info(valid[i]);
+        if (str)
+            total += strlen(str) + 1;
+    }
+
+    char* ans = malloc(total);
+    ans[0] = '\0';
+    int now = 0;
+    for (int i = 0; i < size; ++i) {
+        char* str = _get_token_info(valid[i]);
+        if (str) {
+            size_t len = strlen(str);
+            strcpy(ans+now, str);
+            now += len;
+            ans[now++] = ' ';
+            ans[now] = '\0';
+        }
     }
 
     free(valid);
-    return PyString_AsString(ans);
+    // printf("Allocated address: %p\n", (void*)ans);
+    return ans;
 }

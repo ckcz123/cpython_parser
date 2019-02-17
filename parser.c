@@ -21,7 +21,7 @@ extern int Py_DebugFlag;
 #define D(x)
 #endif
 */
-#define D(x) x
+#define D(x)
 
 /* STACK DATA TYPE */
 

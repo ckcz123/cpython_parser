@@ -7,6 +7,7 @@
 #include "tokenizer.h"
 #include "errcode.h"
 #include "main.h"
+#include "vec.h"
 
 const char* END_MARKER = "__END_MARKER_FOR_PARSER__";
 
@@ -15,8 +16,8 @@ extern grammar _PyParser_Grammar;
 char* token2chars[] = {
     "", // "ENDMARKER",
     "<NAME>", // "NAME",
-    "<NUMBER>", // "NUMBER",
-    "<STRING>", // "STRING",
+    "<num>", // "NUMBER",
+    "<str>", // "STRING",
     "<ENTER>", // "NEWLINE", // --- Use <ENTER>
     "<IND>", // "INDENT", // --- Use <IND>
     "<UNIND>", // "DEDENT", // --- Use <UNIND>
@@ -70,8 +71,18 @@ char* token2chars[] = {
     "<N_TOKENS>", // "<N_TOKENS>"
 };
 
-static PyObject* add_token(struct tok_state *tok) {
-    PyObject* obj = PyList_New(0);
+int split_type_and_str(char* s, char** output) {
+    *output = malloc(strlen(s));
+    int type;
+    sscanf(s, "%d %s", &type, *output);
+    free(s);
+    return type;
+}
+
+static vec_str_t* add_token(struct tok_state *tok) {
+
+    vec_str_t* vec_str = (vec_str_t*)malloc(sizeof(vec_str_t));
+    vec_init(vec_str);
 
     int started = 0;
     for (;;) {
@@ -79,7 +90,6 @@ static PyObject* add_token(struct tok_state *tok) {
         int type;
         size_t len;
         char *str;
-        int col_offset;
 
         type = PyTokenizer_Get(tok, &a, &b);
         if (type == ERRORTOKEN) {
@@ -92,28 +102,33 @@ static PyObject* add_token(struct tok_state *tok) {
             /* Add the right number of dedent tokens,
                except if a certain flag is given --
                codeop.py uses this. */
-            if (tok->indent)
-            {
+            if (tok->indent) {
                 tok->pendin = -tok->indent;
                 tok->indent = 0;
             }
-        }
-        else
+        } else
             started = 1;
 
         if (type == ENDMARKER) {
             break;
         }
 
-        len = b - a; /* XXX this may compute NULL - NULL */
-        str = (char *) PyObject_MALLOC(len + 1);
-        if (str == NULL) {
-            fprintf(stderr, "no mem for next token\n");
-            break;
+        // ------ 特殊处理<str>和<float>
+        int need_free = 0;
+        if (type == 2 || type == 3) {
+            str = token2chars[type];
+        } else {
+            len = b - a; /* XXX this may compute NULL - NULL */
+            str = (char *) PyObject_MALLOC(len + 1);
+            need_free = 1;
+            if (str == NULL) {
+                fprintf(stderr, "no mem for next token\n");
+                break;
+            }
+            if (len > 0)
+                strncpy(str, a, len);
+            str[len] = '\0';
         }
-        if (len > 0)
-            strncpy(str, a, len);
-        str[len] = '\0';
 
         // --- 判定 ---
         if (strcmp(str, END_MARKER) == 0) {
@@ -121,28 +136,25 @@ static PyObject* add_token(struct tok_state *tok) {
             break;
         }
 
-        if (a >= tok->line_start)
-            col_offset = a - tok->line_start;
-        else
-            col_offset = -1;
+        if (*str == '\0') {
+            PyObject_Free(str);
+            need_free = 0;
+            str = "__EMPTY__";
+        }
 
-        // Add ---
-        // type, str, lineno, col_offset
+        char *v = malloc(strlen(str) + 10);
+        sprintf(v, "%d %s", type, str);
+        if (need_free)
+            PyObject_Free(str);
 
-        PyObject* tuple = PyTuple_New(4);
-        PyTuple_SetItem(tuple, 0, PyLong_FromLong(type));
-        PyTuple_SetItem(tuple, 1, PyString_FromString(str));
-        PyTuple_SetItem(tuple, 2, PyLong_FromLong(tok->lineno));
-        PyTuple_SetItem(tuple, 3, PyLong_FromLong(col_offset));
-
-        PyList_Append(obj, tuple);
+        vec_push(vec_str, v);
     }
 
     PyTokenizer_Free(tok);
-    return obj;
+    return vec_str;
 }
 
-PyObject* _tokenize(const char* code, int add_endmarker) {
+vec_str_t* _tokenize(const char* code, int add_endmarker) {
 
     size_t len = strlen(code);
     char *str;
@@ -173,32 +185,73 @@ PyObject* _tokenize(const char* code, int add_endmarker) {
 }
 
 char* tokenize(const char* code, int add_endmarker) {
-    PyObject* list = _tokenize(code, add_endmarker);
+    vec_str_t* vec_str = _tokenize(code, add_endmarker);
 
-    PyObject* ans = PyString_FromString("");
-    ssize_t size = PyList_Size(list);
-    for (ssize_t i = 0; i < size; ++i) {
-        PyObject* tuple = PyList_GetItem(list, i);
-        long type = PyLong_AsLong(PyTuple_GetItem(tuple, 0));
-        char* str = PyString_AsString(PyTuple_GetItem(tuple, 1));
-        char* output;
-        if (*str == '\0') output = token2chars[type];
-        else if (type == 2) output = "<float>";
-        else if (type == 3) output = "<str>";
-        else output = str;
-        PyObject* newstr = PyString_FromFormat("%ld\t%s\t%s\n",
-            type, _PyParser_TokenNames[type], output);
-        PyString_ConcatAndDel(&ans, newstr);
+    // Calculate total size
+    size_t totalLen = 0;
+    for (int i = 0; i < vec_str->length; i++) {
+        char* s = vec_str->data[i];
+        totalLen += 2*strlen(s) + 1;
     }
-    Py_DecRef(list);
 
-    return PyString_AsString(ans);
+    char* ans = malloc(totalLen);
+    ans[0]='\0';
+    int len = 0;
+    for (int i = 0; i < vec_str->length; i++) {
+        char *s = vec_str->data[i], *str;
+        int type = split_type_and_str(s, &str);
+        char* output = strcmp(str, "__EMPTY__") == 0 ? token2chars[type]: str;
+        size_t olen = strlen(output);
+        strcpy(ans+len, output);
+        len += olen;
+        ans[len++] = ' ';
+        ans[len] = '\0';
+        free(str);
+    }
+    vec_deinit(vec_str);
+    free(vec_str);
+    // printf("Allocated address: %p\n", (void*)ans);
+    return ans;
 }
 
-PyObject* _get_token_info(int index) {
+static int _isidentifier(int type, const char* token) {
+    if (type != NAME) return 0;
+
+    grammar* g = &_PyParser_Grammar;
+    int n = g->g_ll.ll_nlabels;
+
+    const char *s = token;
+    label *l = g->g_ll.ll_label;
+    int i;
+    // Check if it's a keyword
+    for (i = n; i > 0; i--, l++) {
+        if (l->lb_type != NAME || l->lb_str == NULL ||
+            l->lb_str[0] != s[0] ||
+            strcmp(l->lb_str, s) != 0)
+            continue;
+        return 0;
+    }
+    return 1;
+}
+
+int isidentifier(const char* token) {
+    vec_str_t* vec_str = _tokenize(token, 1);
+    int is = 1;
+    for (int i = 0; i < vec_str->length; ++i) {
+        char *s = vec_str->data[i], *str;
+        int type = split_type_and_str(s, &str);
+        if (i > 0 || !_isidentifier(type, str))
+            is = 0;
+        free(str);
+    }
+    vec_deinit(vec_str);
+    free(vec_str);
+    return is;
+}
+
+char* _get_token_info(int index) {
     label* l = _PyParser_Grammar.g_ll.ll_label+index;
     int type = l->lb_type;
     char* str = l->lb_str;
-    if (type >= NT_OFFSET) return PyString_FromString("");
-    return PyString_FromFormat("%d\t%s\t%s\n", type, _PyParser_TokenNames[type], str?str:token2chars[type]);
+    return type >= NT_OFFSET ? NULL : str ? str : token2chars[type];
 }

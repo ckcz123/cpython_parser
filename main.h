@@ -6,6 +6,8 @@ extern "C" {
 
 char* tokenize(const char* code, int add_endmarker);
 char* predict(const char* code);
+int isidentifier(const char* token);
+void freeme(char* ptr);
 
 #ifdef __cplusplus
 }
