@@ -683,6 +683,7 @@ decode_str(const char *input, int single, struct tok_state *tok)
         return error_ret(tok);
     str = tok->str;             /* string after BOM if any */
     assert(str);
+    /*
 #ifdef Py_USING_UNICODE
     if (tok->enc != NULL) {
         utf8 = translate_into_utf8(str, tok->enc);
@@ -691,6 +692,7 @@ decode_str(const char *input, int single, struct tok_state *tok)
         str = PyString_AsString(utf8);
     }
 #endif
+     */
     for (s = str;; s++) {
         if (*s == '\0') break;
         else if (*s == '\n') {
@@ -712,6 +714,7 @@ decode_str(const char *input, int single, struct tok_state *tok)
                 return error_ret(tok);
         }
     }
+    /*
 #ifdef Py_USING_UNICODE
     if (tok->enc != NULL) {
         assert(utf8 == NULL);
@@ -721,6 +724,7 @@ decode_str(const char *input, int single, struct tok_state *tok)
         str = PyString_AsString(utf8);
     }
 #endif
+     */
     assert(tok->decoding_buffer == NULL);
     tok->decoding_buffer = utf8; /* CAUTION */
     return str;
