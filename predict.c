@@ -116,7 +116,7 @@ static char* _predict(vec_str_t* vec_str, const char* code) {
             total += strlen(str) + 1;
     }
 
-    char* ans = malloc(total);
+    char* ans = malloc(total + 10);
     ans[0] = '\0';
     int now = 0;
     for (int i = 0; i < size; ++i) {
@@ -147,7 +147,7 @@ char* predict(const char* tokens) {
         if (*end == ' ') {
             *end = '\0';
             if (start != end) {
-                char* str = malloc(10 + (end-start));
+                char* str = malloc(100 + (end-start));
                 sprintf(str, "%d %s", get_type_from_token(start), start);
                 vec_push(vec_str, str);
             }
@@ -156,7 +156,7 @@ char* predict(const char* tokens) {
         }
     }
     if (start != end) {
-        char* str = malloc(10 + (end-start));
+        char* str = malloc(100 + (end-start));
         sprintf(str, "%d %s", get_type_from_token(start), start);
         vec_push(vec_str, str);
     }

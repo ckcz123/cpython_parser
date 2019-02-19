@@ -95,8 +95,9 @@ PyNode_AddChild(register node *n1, int type, char *str, int lineno, int col_offs
             return E_NOMEM;
         }
         n = n1->n_child;
-        n = (node *) PyObject_REALLOC(n,
-                                      required_capacity * sizeof(node));
+        // n = (node *) PyObject_REALLOC(n,
+        //                               required_capacity * sizeof(node));
+        n = realloc(n, required_capacity * sizeof(node));
         if (n == NULL)
             return E_NOMEM;
         n1->n_child = n;
@@ -143,9 +144,11 @@ freechildren(node *n)
     for (i = NCH(n); --i >= 0; )
         freechildren(CHILD(n, i));
     if (n->n_child != NULL)
-        PyObject_FREE(n->n_child);
+        // PyObject_FREE(n->n_child);
+        free(n->n_child);
     if (STR(n) != NULL)
-        PyObject_FREE(STR(n));
+        // PyObject_FREE(STR(n));
+        free(STR(n));
 }
 
 static Py_ssize_t

@@ -68,7 +68,8 @@ fixstate(grammar *g, state *s)
     int *accel;
     int nl = g->g_ll.ll_nlabels;
     s->s_accept = 0;
-    accel = (int *) PyObject_MALLOC(nl * sizeof(int));
+    // accel = (int *) PyObject_MALLOC(nl * sizeof(int) + 100);
+    accel = malloc(nl * sizeof(int));
     if (accel == NULL) {
         fprintf(stderr, "no mem to build parser accelerators\n");
         exit(1);
@@ -121,5 +122,6 @@ fixstate(grammar *g, state *s)
         for (i = 0; k < nl; i++, k++)
             s->s_accel[i] = accel[k];
     }
-    PyObject_FREE(accel);
+    // PyObject_FREE(accel);
+    free(accel);
 }

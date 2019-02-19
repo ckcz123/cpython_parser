@@ -76,7 +76,8 @@ PyParser_New(grammar *g, int start)
 
     if (!g->g_accel)
         PyGrammar_AddAccelerators(g);
-    ps = (parser_state *)PyMem_MALLOC(sizeof(parser_state));
+    // ps = (parser_state *)PyMem_MALLOC(sizeof(parser_state));
+    ps = (parser_state *)malloc(sizeof(parser_state));
     if (ps == NULL)
         return NULL;
     ps->p_grammar = g;
@@ -99,7 +100,8 @@ PyParser_Delete(parser_state *ps)
     /* NB If you want to save the parse tree,
        you must set p_tree to NULL before calling delparser! */
     PyNode_Free(ps->p_tree);
-    PyMem_FREE(ps);
+    // PyMem_FREE(ps);
+    free(ps);
 }
 
 
