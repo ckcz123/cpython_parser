@@ -69,6 +69,8 @@ class CPythonHelper:
             return []
         ans = cast(raw, c_char_p).value
         self._free(raw)
+        if ans is None:
+            return None
         return ans.strip().split(" ")
 
     """
@@ -82,5 +84,6 @@ if __name__ == '__main__':
     helper = CPythonHelper()
     print helper.tokenize("if a in c[\"hello\"][4]:")
     print helper.predict(['[', 'a', 'for', '<unk>', 'in', 'range', '(', 'c'])
-    print helper.predict("[a for b in range(c")
+    print helper.predict("[a for b in range(")
     print helper.isidentifier("print")
+    print helper.predict("a b")

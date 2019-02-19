@@ -29,7 +29,7 @@ extern vec_str_t* _tokenize(const char*, int);
 
 extern char* _get_token_info(int);
 
-static parser_state* run_to_current(vec_str_t* vec_str) {
+static parser_state* run_to_current(vec_str_t* vec_str, const char* code) {
     int len = vec_str->length;
     parser_state* ps;
     if ((ps = PyParser_New(&_PyParser_Grammar, Py_file_input)) == NULL) {
@@ -43,7 +43,7 @@ static parser_state* run_to_current(vec_str_t* vec_str) {
         if ((error = PyParser_AddToken(ps, type, str, 1, 0,
                                        NULL)) != E_OK) {
             if (error != E_DONE) {
-                fprintf(stderr, "ERROR in parsing...\n");
+                fprintf(stderr, "ERROR in parsing: %s\n", code);
                 PyParser_Delete(ps);
                 return NULL;
             }
@@ -97,8 +97,8 @@ static int* predict_next(parser_state* ps, int* size) {
     return ans;
 }
 
-static char* _predict(vec_str_t* vec_str) {
-    parser_state* ps = run_to_current(vec_str);
+static char* _predict(vec_str_t* vec_str, const char* code) {
+    parser_state* ps = run_to_current(vec_str, code);
     if (ps == NULL)
         return NULL;
 
@@ -163,9 +163,9 @@ char* predict(const char* tokens) {
 
     free(code);
 
-    return _predict(vec_str);
+    return _predict(vec_str, code);
 }
 
 char* predict2(const char* code) {
-    return _predict(_tokenize(code, 1));
+    return _predict(_tokenize(code, 1), code);
 }
