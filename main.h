@@ -5,7 +5,8 @@ extern "C" {
 #endif
 
 char* tokenize(const char* code, int add_endmarker);
-char* predict(const char* code);
+char* predict(const char* tokens);
+char* predict2(const char* code);
 int isidentifier(const char* token);
 void freeme(char* ptr);
 

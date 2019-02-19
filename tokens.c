@@ -79,6 +79,14 @@ int split_type_and_str(char* s, char** output) {
     return type;
 }
 
+int get_type_from_token(char* token) {
+    for (int i = 2; i <= 50; ++i) {
+        if (strcmp(token, token2chars[i]) == 0)
+            return i;
+    }
+    return 1;
+}
+
 static vec_str_t* add_token(struct tok_state *tok) {
 
     vec_str_t* vec_str = (vec_str_t*)malloc(sizeof(vec_str_t));
@@ -155,7 +163,6 @@ static vec_str_t* add_token(struct tok_state *tok) {
 }
 
 vec_str_t* _tokenize(const char* code, int add_endmarker) {
-
     size_t len = strlen(code);
     char *str;
     if (add_endmarker) {

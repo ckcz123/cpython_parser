@@ -14,6 +14,10 @@ class CPythonHelper:
         _predict.argtypes = [c_char_p]
         _predict.restype = c_void_p
 
+        _predict2 = dll.predict2
+        _predict2.argtypes = [c_char_p]
+        _predict2.restype = c_void_p
+
         _isidentifier = dll.isidentifier
         _isidentifier.argtypes = [c_char_p]
         _isidentifier.restype = c_int
@@ -25,12 +29,13 @@ class CPythonHelper:
         self.dll = dll
         self._tokenize = _tokenize
         self._predict = _predict
+        self._predict2 = _predict2
         self._isidentifier = _isidentifier
         self._free = _free
 
     """
     Try to tokenize given code. Returns a string, separated by a single space.
-    Input:
+    Sample input:
         [a for b in range(c
     Sample output: (add_endmarker=0)
         [ a for b in range ( c <ENTER>
@@ -46,16 +51,29 @@ class CPythonHelper:
         return ans
 
     """
-    Try to predict next code. Returns a list, <NAME> for any valid name.
+    Try to predict next token. Returns a list, <NAME> for any valid name.
+    Input can be a string or a list of tokenized tokens.
+    Sample input:
+        "[a for b in range(c"
+        OR
+        ['[', 'a', 'for', '<unk>', 'in', 'range', '(', 'c']
+    Sample output
+        ['(', '**', '.', '[', '*', ..., 'in', 'not', '<', '>', '==', ..., 'is', 'and', 'or', 'if', '=', 'for', ',', ')']
     """
     def predict(self, code):
-        raw = self._predict(code)
+        if type(code) is list:
+            raw = self._predict(" ".join(code))
+        elif type(code) is str:
+            raw = self._predict2(code)
+        else:
+            return []
         ans = cast(raw, c_char_p).value
         self._free(raw)
         return ans.strip().split(" ")
 
     """
     If this token is an identifier.
+    Input should be a single token.
     """
     def isidentifier(self, token):
         return self._isidentifier(token) > 0
@@ -63,5 +81,6 @@ class CPythonHelper:
 if __name__ == '__main__':
     helper = CPythonHelper()
     print helper.tokenize("if a in c[\"hello\"][4]:")
-    print helper.predict("if a in c[\"hello\"][4]:")
+    print helper.predict(['[', 'a', 'for', '<unk>', 'in', 'range', '(', 'c'])
+    print helper.predict("[a for b in range(c")
     print helper.isidentifier("print")

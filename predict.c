@@ -23,6 +23,8 @@ extern void __printtree(parser_state *ps);
 
 extern int split_type_and_str(char* s, char** output);
 
+extern int get_type_from_token(char* token);
+
 extern vec_str_t* _tokenize(const char*, int);
 
 extern char* _get_token_info(int);
@@ -95,8 +97,8 @@ static int* predict_next(parser_state* ps, int* size) {
     return ans;
 }
 
-char* predict(const char* code) {
-    parser_state* ps = run_to_current(_tokenize(code, 1));
+static char* _predict(vec_str_t* vec_str) {
+    parser_state* ps = run_to_current(vec_str);
     if (ps == NULL)
         return NULL;
 
@@ -131,4 +133,39 @@ char* predict(const char* code) {
     free(valid);
     // printf("Allocated address: %p\n", (void*)ans);
     return ans;
+}
+
+char* predict(const char* tokens) {
+    vec_str_t* vec_str = (vec_str_t*)malloc(sizeof(vec_str_t));
+    vec_init(vec_str);
+
+    char* code = strdup(tokens);
+
+    char* start = code, * end = code;
+    while (*end != '\0') {
+        end++;
+        if (*end == ' ') {
+            *end = '\0';
+            if (start != end) {
+                char* str = malloc(10 + (end-start));
+                sprintf(str, "%d %s", get_type_from_token(start), start);
+                vec_push(vec_str, str);
+            }
+            end++;
+            start = end;
+        }
+    }
+    if (start != end) {
+        char* str = malloc(10 + (end-start));
+        sprintf(str, "%d %s", get_type_from_token(start), start);
+        vec_push(vec_str, str);
+    }
+
+    free(code);
+
+    return _predict(vec_str);
+}
+
+char* predict2(const char* code) {
+    return _predict(_tokenize(code, 1));
 }

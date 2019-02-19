@@ -25,7 +25,11 @@ int main() {
     printf("%s\n", s);
     freeme(s);
 
-    s = predict("for a, b in ");
+    s = predict("for a , <unk> in c [ <str> ] [ <num>");
+    printf("%s\n", s);
+    freeme(s);
+
+    s = predict2("for a, b in c['x'][2");
     printf("%s\n", s);
     freeme(s);
 
