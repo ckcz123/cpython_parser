@@ -121,14 +121,9 @@ static vec_str_t* add_token(struct tok_state *tok) {
             break;
         }
 
-        // ------ 特殊处理<str>和<float>
-        int need_free = 0;
-        if (type == 2 || type == 3) {
-            str = token2chars[type];
-        } else {
+        if (type == 1) {
             len = b - a; /* XXX this may compute NULL - NULL */
             str = (char *) PyObject_MALLOC(len + 1);
-            need_free = 1;
             if (str == NULL) {
                 fprintf(stderr, "no mem for next token\n");
                 break;
@@ -137,22 +132,20 @@ static vec_str_t* add_token(struct tok_state *tok) {
                 strncpy(str, a, len);
             str[len] = '\0';
         }
+        else {
+            str = token2chars[type];
+        }
 
         // --- 判定 ---
         if (strcmp(str, END_MARKER) == 0) {
-            PyObject_Free(str);
+            if (type == 1)
+                PyObject_Free(str);
             break;
-        }
-
-        if (*str == '\0') {
-            PyObject_Free(str);
-            need_free = 0;
-            str = "__EMPTY__";
         }
 
         char *v = malloc(strlen(str) + 10);
         sprintf(v, "%d %s", type, str);
-        if (need_free)
+        if (type == 1)
             PyObject_Free(str);
 
         vec_push(vec_str, v);
@@ -206,11 +199,10 @@ char* tokenize(const char* code, int add_endmarker) {
     int len = 0;
     for (int i = 0; i < vec_str->length; i++) {
         char *s = vec_str->data[i], *str;
-        int type = split_type_and_str(s, &str);
-        char* output = strcmp(str, "__EMPTY__") == 0 ? token2chars[type]: str;
-        size_t olen = strlen(output);
-        strcpy(ans+len, output);
-        len += olen;
+        split_type_and_str(s, &str);
+        size_t slen = strlen(str);
+        strcpy(ans+len, str);
+        len += slen;
         ans[len++] = ' ';
         ans[len] = '\0';
         free(str);

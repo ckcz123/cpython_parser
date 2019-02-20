@@ -21,7 +21,12 @@ void freeme(char* ptr)
 }
 
 int main() {
-    char* s = tokenize("for a, b in c['x'][2", 0);
+
+    char* s = tokenize("if a:# hahaha\n    b = c", 0);
+    printf("%s\n", s);
+    freeme(s);
+
+    s = tokenize("for a, b in c['x'][2", 1);
     printf("%s\n", s);
     freeme(s);
 

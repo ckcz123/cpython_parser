@@ -86,4 +86,5 @@ if __name__ == '__main__':
     print helper.predict(['[', 'a', 'for', '<unk>', 'in', 'range', '(', 'c'])
     print helper.predict("[a for b in range(")
     print helper.isidentifier("print")
-    print helper.predict("a b")
+    print helper.predict(["if", "a", ":", "<ENTER>"])
+    print helper.tokenize("if a: # hahaha\n    b = c")
