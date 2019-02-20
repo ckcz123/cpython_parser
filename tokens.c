@@ -102,6 +102,8 @@ static vec_str_t* add_token(struct tok_state *tok) {
         type = PyTokenizer_Get(tok, &a, &b);
         if (type == ERRORTOKEN) {
             fprintf(stderr, "ERRORTOKEN\n");
+            // --- 添加 err_token
+            vec_push(vec_str ,strdup("52 <ERROR>"));
             break;
         }
         if (type == ENDMARKER && started) {
